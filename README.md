@@ -43,4 +43,7 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_loadbalancer"></a> [loadbalancer](#output\_loadbalancer) | Load Balancer object |
+| <a name="output_loadbalancer_backend_address_pool"></a> [loadbalancer\_backend\_address\_pool](#output\_loadbalancer\_backend\_address\_pool) | Load Balancer backend address pool object |
+| <a name="output_loadbalancer_backend_rule"></a> [loadbalancer\_backend\_rule](#output\_loadbalancer\_backend\_rule) | Load Balancer backend rule object |
+| <a name="output_loadbalancer_health_probe"></a> [loadbalancer\_health\_probe](#output\_loadbalancer\_health\_probe) | Load Balancer  health probe object |
 <!-- END_TF_DOCS -->
