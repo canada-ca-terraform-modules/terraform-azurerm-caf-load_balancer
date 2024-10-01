@@ -6,7 +6,7 @@ variable "load_balancers" {
 
 module "load_balancer" {
   for_each = var.load_balancers
-  source   = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-load_balancer.git?ref=v1.0.0"
+  source   = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-load_balancer.git"
 
   location          = var.location
   subnets           = local.subnets
