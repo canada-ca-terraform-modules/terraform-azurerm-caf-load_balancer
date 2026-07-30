@@ -26,6 +26,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- `azurerm_lb.loadbalancer.sku`: was reading from the non-existent `var.load_balancer.lb.sku`
+  path, so callers setting `load_balancer.sku` (as documented in `ESLZ/load-balancer.tfvars`) had
+  no effect — always fell through to the `"Standard"` default. Now reads `var.load_balancer.sku`.
+- `azurerm_lb_backend_address_pool.loadbalancer-lbbp` tunnel interfaces: dynamic block read from
+  `var.load_balancer.tunnel_interfaces` (plural), which never matched the documented
+  `tunnel_interface` (singular) key in `ESLZ/load-balancer.tfvars` — Gateway SKU tunnel interfaces
+  were silently never created. Now reads `var.load_balancer.tunnel_interface`.
 - `locals.tf`: invalid regex escape sequence `[^\/]+$` corrected to `[^/]+$` in the resource group
   name parsing (forward slash never needs escaping in RE2).
 - `module.tf`: `frontend_ip_configuration.subnet_id` and `.private_ip_address` no longer crash when

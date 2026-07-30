@@ -172,3 +172,56 @@ run "custom_resource_names" {
     error_message = "rule frontend_ip_configuration_name must follow the overridden frontend name"
   }
 }
+
+run "caller_sku_override" {
+  command = plan
+
+  variables {
+    load_balancer = {
+      resource_group_name = "rg-test"
+      postfix             = "05"
+      sku                 = "Gateway"
+      frontend_ip_configuration = {
+        feipc1 = {
+          subnet                        = "MAZ"
+          private_ip_address_allocation = "Dynamic"
+        }
+      }
+    }
+  }
+
+  assert {
+    condition     = azurerm_lb.loadbalancer.sku == "Gateway"
+    error_message = "sku must read from var.load_balancer.sku (top-level), not var.load_balancer.lb.sku"
+  }
+}
+
+run "tunnel_interface_gateway_lb" {
+  command = plan
+
+  variables {
+    load_balancer = {
+      resource_group_name = "rg-test"
+      postfix             = "06"
+      frontend_ip_configuration = {
+        feipc1 = {
+          subnet                        = "MAZ"
+          private_ip_address_allocation = "Dynamic"
+        }
+      }
+      tunnel_interface = {
+        ti1 = {
+          identifier = 800
+          type       = "Internal"
+          protocol   = "VXLAN"
+          port       = 2000
+        }
+      }
+    }
+  }
+
+  assert {
+    condition     = length(azurerm_lb_backend_address_pool.loadbalancer-lbbp.tunnel_interface) == 1
+    error_message = "tunnel_interface must read from var.load_balancer.tunnel_interface (matches ESLZ tfvars key), not tunnel_interfaces"
+  }
+}
