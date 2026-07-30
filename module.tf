@@ -24,7 +24,7 @@ resource "azurerm_lb" "loadbalancer" {
     }
   }
 
-  sku      = try(var.load_balancer.lb.sku, "Standard")
+  sku      = try(var.load_balancer.sku, "Standard")
   sku_tier = try(var.load_balancer.sku_tier, null)
   tags     = merge(var.tags, try(var.load_balancer.tags, {}))
 }
@@ -47,7 +47,7 @@ resource "azurerm_lb_backend_address_pool" "loadbalancer-lbbp" {
   loadbalancer_id  = azurerm_lb.loadbalancer.id
   synchronous_mode = try(var.load_balancer.synchronous_mode, null)
   dynamic "tunnel_interface" {
-    for_each = try(var.load_balancer.tunnel_interfaces, {})
+    for_each = try(var.load_balancer.tunnel_interface, {})
     content {
       identifier = tunnel_interface.value.identifier
       type       = tunnel_interface.value.type
