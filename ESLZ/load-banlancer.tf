@@ -1,12 +1,16 @@
+terraform {
+  required_version = ">= 1.9"
+}
+
 variable "load_balancers" {
-  type = any
-  default = {}
+  type        = any
+  default     = {}
   description = "Value for load balancer. This is a collection of values as defined in load_balancer.tfvars"
 }
 
 module "load_balancer" {
   for_each = var.load_balancers
-  source   = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-load_balancer.git?ref=v1.0.1"
+  source   = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-load_balancer.git?ref=v2.0.0"
 
   location          = var.location
   subnets           = local.subnets
@@ -14,9 +18,5 @@ module "load_balancer" {
   userDefinedString = each.key
   tags              = var.tags
   env               = var.env
-  group             = var.group
-  project           = var.project
-  load_balancer      = each.value
-  custom_data       = try(each.value.custom_data, false) != false ? base64encode(file("${path.cwd}/${each.value.custom_data}")) : null
-  user_data         = try(each.value.user_data, false) != false ? base64encode(file("${path.cwd}/${each.value.user_data}")) : null
+  load_balancer     = each.value
 }

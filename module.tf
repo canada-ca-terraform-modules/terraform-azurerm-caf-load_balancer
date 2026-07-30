@@ -12,11 +12,11 @@ resource "azurerm_lb" "loadbalancer" {
     for_each = try(var.load_balancer.frontend_ip_configuration, {})
 
     content {
-      name                                               = "${local.load_balancer_name}-${frontend_ip_configuration.key}-lbfe"
+      name                                               = try(frontend_ip_configuration.value.name, "${local.load_balancer_name}-${frontend_ip_configuration.key}-lbfe")
       zones                                              = try(frontend_ip_configuration.value.zones, null)
-      subnet_id                                          = strcontains(frontend_ip_configuration.value.subnet, "/resourceGroups/") ? frontend_ip_configuration.value.subnet : var.subnets[frontend_ip_configuration.value.subnet].id
+      subnet_id                                          = try(frontend_ip_configuration.value.subnet, null) == null ? null : (strcontains(frontend_ip_configuration.value.subnet, "/resourceGroups/") ? frontend_ip_configuration.value.subnet : var.subnets[frontend_ip_configuration.value.subnet].id)
       gateway_load_balancer_frontend_ip_configuration_id = try(frontend_ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_id, null)
-      private_ip_address                                 = try(frontend_ip_configuration.value.private_ip_address_allocation, "Static") == "Static" ? frontend_ip_configuration.value.private_ip_address : null
+      private_ip_address                                 = try(frontend_ip_configuration.value.private_ip_address_allocation, "Static") == "Static" ? try(frontend_ip_configuration.value.private_ip_address, null) : null
       private_ip_address_allocation                      = try(frontend_ip_configuration.value.private_ip_address_allocation, "Static")
       private_ip_address_version                         = try(frontend_ip_configuration.value.private_ip_address_version, "IPv4")
       public_ip_address_id                               = try(frontend_ip_configuration.value.public_ip_address_id, null)
@@ -32,7 +32,7 @@ resource "azurerm_lb" "loadbalancer" {
 resource "azurerm_lb_probe" "loadbalancer-lbhp" {
   for_each = try(var.load_balancer.probes, {})
 
-  name                = "${local.load_balancer_name}-${each.key}-lbhp"
+  name                = try(each.value.name, "${local.load_balancer_name}-${each.key}-lbhp")
   loadbalancer_id     = azurerm_lb.loadbalancer.id
   protocol            = try(each.value["protocol"], "Tcp")
   port                = each.value.port
@@ -43,7 +43,7 @@ resource "azurerm_lb_probe" "loadbalancer-lbhp" {
 }
 
 resource "azurerm_lb_backend_address_pool" "loadbalancer-lbbp" {
-  name             = "${local.load_balancer_name}-HA-lbbp"
+  name             = try(var.load_balancer.backend_address_pool_name, "${local.load_balancer_name}-HA-lbbp")
   loadbalancer_id  = azurerm_lb.loadbalancer.id
   synchronous_mode = try(var.load_balancer.synchronous_mode, null)
   dynamic "tunnel_interface" {
@@ -61,17 +61,17 @@ resource "azurerm_lb_backend_address_pool" "loadbalancer-lbbp" {
 resource "azurerm_lb_rule" "loadbalancer-lbr" {
   for_each = try(var.load_balancer.rules, {})
 
-  name                           = "${local.load_balancer_name}-${each.key}-lbr"
+  name                           = try(each.value.name, "${local.load_balancer_name}-${each.key}-lbr")
   loadbalancer_id                = azurerm_lb.loadbalancer.id
-  frontend_ip_configuration_name = "${local.load_balancer_name}-${each.value.frontend_ip_configuration_name}-lbfe"
+  frontend_ip_configuration_name = try(var.load_balancer.frontend_ip_configuration[each.value.frontend_ip_configuration_name].name, "${local.load_balancer_name}-${each.value.frontend_ip_configuration_name}-lbfe")
   protocol                       = each.value.protocol
   frontend_port                  = each.value.frontend_port
   backend_port                   = each.value.backend_port
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.loadbalancer-lbbp.id]
-  probe_id                       = try(each.value.probe_name, "") == "" ? null : azurerm_lb_probe.loadbalancer-lbhp["${each.value.probe_name}"].id
-  enable_floating_ip             = try(each.value.enable_floating_ip, null)
+  probe_id                       = try(each.value.probe_name, "") == "" ? null : azurerm_lb_probe.loadbalancer-lbhp[each.value.probe_name].id
+  floating_ip_enabled            = try(each.value.enable_floating_ip, null)
   idle_timeout_in_minutes        = try(each.value.idle_timeout_in_minutes, 4)
   load_distribution              = try(each.value.load_distribution, null)
   disable_outbound_snat          = try(each.value.disable_outbound_snat, null)
-  enable_tcp_reset               = try(each.value.enable_tcp_reset, null)
+  tcp_reset_enabled              = try(each.value.enable_tcp_reset, null)
 }

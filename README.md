@@ -1,13 +1,35 @@
+# terraform-azurerm-caf-load_balancer
+
+Terraform module to deploy an Azure Load Balancer (`azurerm_lb`) along with its
+health probes, backend address pool, and load balancing rules, following the
+SSC CAF naming convention. Requires the `azurerm` provider `~> 5.0`.
+
+## New optional arguments (name overrides)
+
+Every auto-generated resource name accepts an optional caller-supplied override so
+existing deployments whose real names diverge from the naming formula can be
+managed without a destroy/recreate:
+
+| Location | Key | Default when omitted |
+|---|---|---|
+| `load_balancer.frontend_ip_configuration.<key>` | `name` | `<lb-name>-<key>-lbfe` |
+| `load_balancer` | `backend_address_pool_name` | `<lb-name>-HA-lbbp` |
+| `load_balancer.probes.<key>` | `name` | `<lb-name>-<key>-lbhp` |
+| `load_balancer.rules.<key>` | `name` | `<lb-name>-<key>-lbr` |
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | n/a |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.0 |
 
 ## Modules
 
@@ -26,17 +48,13 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | (Optional) The Base64-Encoded Custom Data which should be used for this Virtual Machine Scale Set. | `string` | `null` | no |
-| <a name="input_env"></a> [env](#input\_env) | (Required) 4 character string defining the environment name prefix for the VM | `string` | n/a | yes |
-| <a name="input_group"></a> [group](#input\_group) | (Required) Character string defining the group for the target subscription | `string` | n/a | yes |
+| <a name="input_env"></a> [env](#input\_env) | (Required) 4 character string defining the environment name prefix for the Load Balancer | `string` | n/a | yes |
 | <a name="input_load_balancer"></a> [load\_balancer](#input\_load\_balancer) | Details about load balancer | `any` | `{}` | no |
-| <a name="input_location"></a> [location](#input\_location) | Azure location for the VM | `string` | `"canadacentral"` | no |
-| <a name="input_project"></a> [project](#input\_project) | (Required) Character string defining the project for the target subscription | `string` | n/a | yes |
-| <a name="input_resource_groups"></a> [resource\_groups](#input\_resource\_groups) | (Required) Resource group object for the VM | `any` | `{}` | no |
-| <a name="input_subnets"></a> [subnets](#input\_subnets) | (Required) List of subnet objects for the VM | `any` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be applied to every associated VM resource | `map(string)` | `{}` | no |
-| <a name="input_userDefinedString"></a> [userDefinedString](#input\_userDefinedString) | (Required) User defined portion value for the name of the VM. | `string` | n/a | yes |
-| <a name="input_user_data"></a> [user\_data](#input\_user\_data) | (Optional) The Base64-Encoded User Data which should be used for this Virtual Machine Scale Set. | `string` | `null` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure location for the Load Balancer | `string` | `"canadacentral"` | no |
+| <a name="input_resource_groups"></a> [resource\_groups](#input\_resource\_groups) | (Required) Resource group object for the Load Balancer | `any` | `{}` | no |
+| <a name="input_subnets"></a> [subnets](#input\_subnets) | (Required) List of subnet objects for the Load Balancer | `any` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be applied to every associated Load Balancer resource | `map(string)` | `{}` | no |
+| <a name="input_userDefinedString"></a> [userDefinedString](#input\_userDefinedString) | (Required) User defined portion value for the name of the Load Balancer. | `string` | n/a | yes |
 
 ## Outputs
 
